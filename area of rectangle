@@ -1,0 +1,15 @@
+#include<iostrem>
+using namespace std;
+
+in main() {
+int length = 10;
+int width = 25;
+
+int area = length * width;
+
+cout << "length is : " << length << "\n";
+cout << "width is : " << width << "\n";
+cout << "The area of rectangle is : " << area <<"\n";
+
+return 0;
+}
