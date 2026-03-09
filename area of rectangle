@@ -1,57 +1,120 @@
 #include <iostream>
-#include <iomanip>   // for formatted output
+#include <iomanip>
+#include <vector>
+#include <stdexcept>
+#include <algorithm>
 using namespace std;
 
-// Rectangle class
 class Rectangle {
 private:
     double length;
     double width;
+    static int count; // static counter
 
 public:
     // Constructor
     Rectangle(double l, double w) {
-        if (l <= 0 || w <= 0) {
-            throw invalid_argument("Length and width must be positive!");
-        }
+        setLength(l);
+        setWidth(w);
+        count++;
+    }
+
+    // Setters with validation
+    void setLength(double l) {
+        if (l <= 0) throw invalid_argument("Length must be positive!");
         length = l;
+    }
+
+    void setWidth(double w) {
+        if (w <= 0) throw invalid_argument("Width must be positive!");
         width = w;
     }
 
-    // Function to calculate area
-    double area() const {
-        return length * width;
-    }
+    // Getters
+    double getLength() const { return length; }
+    double getWidth() const { return width; }
 
-    // Function to calculate perimeter
-    double perimeter() const {
-        return 2 * (length + width);
-    }
+    // Area and perimeter
+    double area() const { return length * width; }
+    double perimeter() const { return 2 * (length + width); }
 
-    // Display rectangle details
+    // Operator overloading for comparisons
+    bool operator>(const Rectangle& other) const { return area() > other.area(); }
+    bool operator<(const Rectangle& other) const { return area() < other.area(); }
+    bool operator==(const Rectangle& other) const { return area() == other.area(); }
+
+    // Display details
     void display() const {
         cout << fixed << setprecision(2);
-        cout << "Length: " << length << " units\n";
-        cout << "Width : " << width << " units\n";
-        cout << "Area  : " << area() << " sq. units\n";
-        cout << "Perimeter: " << perimeter() << " units\n";
+        cout << "Length: " << length << " units, "
+             << "Width: " << width << " units, "
+             << "Area: " << area() << " sq. units, "
+             << "Perimeter: " << perimeter() << " units\n";
     }
+
+    // Static function to get count
+    static int getCount() { return count; }
 };
 
-int main() {
-    try {
-        double l, w;
-        cout << "Enter length of rectangle: ";
-        cin >> l;
-        cout << "Enter width of rectangle: ";
-        cin >> w;
+// Initialize static member
+int Rectangle::count = 0;
 
-        Rectangle rect(l, w);
-        rect.display();
-    }
-    catch (const exception &e) {
-        cerr << "Error: " << e.what() << endl;
-    }
+int main() {
+    vector<Rectangle> rectangles;
+    int choice;
+
+    do {
+        cout << "\n--- Rectangle Menu ---\n";
+        cout << "1. Add a rectangle\n";
+        cout << "2. Display all rectangles\n";
+        cout << "3. Find largest rectangle by area\n";
+        cout << "4. Show total rectangles created\n";
+        cout << "5. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        try {
+            if (choice == 1) {
+                double l, w;
+                cout << "Enter length: ";
+                cin >> l;
+                cout << "Enter width: ";
+                cin >> w;
+                rectangles.emplace_back(l, w);
+                cout << "Rectangle added successfully!\n";
+            }
+            else if (choice == 2) {
+                cout << "\n--- Rectangle List ---\n";
+                for (size_t i = 0; i < rectangles.size(); i++) {
+                    cout << "Rectangle " << i + 1 << ": ";
+                    rectangles[i].display();
+                }
+            }
+            else if (choice == 3) {
+                if (!rectangles.empty()) {
+                    auto largest = *max_element(rectangles.begin(), rectangles.end(),
+                        [](const Rectangle& a, const Rectangle& b) { return a.area() < b.area(); });
+                    cout << "\nLargest Rectangle by Area:\n";
+                    largest.display();
+                } else {
+                    cout << "No rectangles available!\n";
+                }
+            }
+            else if (choice == 4) {
+                cout << "Total rectangles created: " << Rectangle::getCount() << "\n";
+            }
+            else if (choice == 5) {
+                cout << "Exiting program...\n";
+            }
+            else {
+                cout << "Invalid choice! Try again.\n";
+            }
+        }
+        catch (const exception& e) {
+            cerr << "Error: " << e.what() << endl;
+        }
+
+    } while (choice != 5);
 
     return 0;
 }
